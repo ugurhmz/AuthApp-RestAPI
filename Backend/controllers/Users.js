@@ -96,11 +96,56 @@ exports.userActivationController = async (req, res) => {
       const verifiedSavedUser = await findUser.save();
       return res.status(httpStatus.OK).json("Registration successful");
     } else {
-      return res.status(httpStatus.BAD_REQUEST).json("E-mail not verified");
+      return res
+        .status(httpStatus.INTERNAL_SERVER_ERROR)
+        .json("E-mail not verified");
     }
   } catch (err) {
     res
       .status(httpStatus.UNAVAILABLE_FOR_LEGAL_REASONS)
       .json("E-mail not verified");
+  }
+};
+
+// LOGIN
+exports.loginController = async (req, res) => {
+  try {
+    const findUser = await UserModel.findOne({ email: req.body.email });
+
+    if (!findUser) {
+      return res.status(httpStatus.NOT_FOUND).json({
+        msg: "User not found, try again!",
+      });
+    }
+
+    const decryptUserPassword = CryptoJs.AES.decrypt(
+      findUser.password,
+      process.env.PAS_HASH_SECURITY
+    );
+
+    const userDbPassword = decryptUserPassword.toString(CryptoJs.enc.Utf8);
+    if (userDbPassword !== req.body.password) {
+      return res.status(httpStatus.NOT_FOUND).json({
+        error: "Your password is wrong please fix it!",
+      });
+    }
+
+    const loginToken = jwt.sign(
+      {
+        id: findUser._id,
+      },
+      process.env.JWT_SECURITY,
+      {
+        expiresIn: "7d",
+      }
+    );
+
+    const { password, ...exceptThePassword } = findUser._doc;
+    res.status(httpStatus.OK).json({
+      ...exceptThePassword,
+      loginToken,
+    });
+  } catch (err) {
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json(err);
   }
 };
