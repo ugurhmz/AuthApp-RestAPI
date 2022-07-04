@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const logger = require("../logging/Users");
 
 const UserSchema = new mongoose.Schema(
   {
@@ -20,5 +21,12 @@ const UserSchema = new mongoose.Schema(
   },
   { timestamps: true, versionKey: false }
 );
+
+UserSchema.post("save", (obj) => {
+  logger.log({
+    level: "info",
+    message: `${obj.name} saved.`,
+  });
+});
 
 module.exports = mongoose.model("UserModel", UserSchema);

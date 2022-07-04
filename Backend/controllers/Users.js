@@ -23,7 +23,7 @@ exports.registerController = async (req, res) => {
 
     if (findUser) {
       return res.status(httpStatus.CONFLICT).json({
-        error: "This a record already exists!, Pls change e-mail or username!",
+        error: "This record already exists!, Pls change e-mail or username!",
       });
     }
 
