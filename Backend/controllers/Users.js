@@ -3,12 +3,11 @@ const httpStatus = require("http-status");
 const CryptoJs = require("crypto-js");
 const nodemailer = require("nodemailer");
 const jwt = require("jsonwebtoken");
+const uuid = require("uuid");
 
 // REGISTER & E-MAIL verification
 exports.registerController = async (req, res) => {
   const { email, username, name, password } = req.body;
-  console.log(req.body);
-
   try {
     const findUser = await UserModel.findOne({
       $or: [
@@ -145,6 +144,38 @@ exports.loginController = async (req, res) => {
       ...exceptThePassword,
       loginToken,
     });
+  } catch (err) {
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json(err);
+  }
+};
+
+// FORGET PASSWORD
+exports.resetPasswordController = async (req, res) => {
+  try {
+    const findUser = await UserModel.findOne({ email: req.body.email });
+
+    if (!findUser) {
+      return res.status(httpStatus.NOT_FOUND).json({
+        msg: "User not found, try again!",
+      });
+    }
+
+    const newPassword = uuid.v4()?.split("-")[0] || new Date().getTime();
+    console.log(newPassword);
+    const updatedUser = await UserModel.findOneAndUpdate(
+      {
+        email: req.body.email,
+      },
+      {
+        password: CryptoJs.AES.encrypt(
+          newPassword,
+          process.env.PAS_HASH_SECURITY
+        ).toString(),
+      },
+      { new: true }
+    );
+
+    res.status(httpStatus.OK).json(updatedUser);
   } catch (err) {
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json(err);
   }

@@ -8,16 +8,32 @@ const {
   registerController,
   userActivationController,
   loginController,
+  resetPasswordController,
 } = require("../controllers/Users.js");
 
-// ROUTING
+// REGISTER
 router.post(
   "/register",
   validate(schemas.createValidation),
   registerController
 );
 
+// ACTIVATION
 router.get("/activation/:token", userActivationController);
-router.post("/login", verifyEmail, loginController);
+
+// LOGIN
+router.post(
+  "/login",
+  validate(schemas.loginValidation),
+  verifyEmail,
+  loginController
+);
+
+// RESET-PASSWORD
+router.post(
+  "/reset-password",
+  validate(schemas.resetPasswordValidation),
+  resetPasswordController
+);
 
 module.exports = router;
