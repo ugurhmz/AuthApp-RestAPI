@@ -15,6 +15,8 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: "classic",
     },
+    activationToken: { type: String },
+    isVerified: { type: Boolean, default: false },
   },
   { timestamps: true, versionKey: false }
 );
