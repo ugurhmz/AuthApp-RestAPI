@@ -1,5 +1,6 @@
 const UserModel = require("../models/UserModel");
 const httpStatus = require("http-status");
+const CryptoJs = require("crypto-js");
 
 // REGISTER
 exports.registerController = async (req, res) => {
@@ -24,7 +25,15 @@ exports.registerController = async (req, res) => {
       });
     }
 
-    const newUser = new UserModel(req.body);
+    const newUser = new UserModel({
+      email: email,
+      username: username,
+      name: name,
+      password: CryptoJs.AES.encrypt(
+        req.body.password,
+        process.env.PAS_HASH_SECURITY
+      ),
+    });
     const savedUser = await newUser.save();
 
     res.status(httpStatus.OK).json(savedUser);
