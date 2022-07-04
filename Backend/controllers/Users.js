@@ -175,7 +175,48 @@ exports.resetPasswordController = async (req, res) => {
       { new: true }
     );
 
-    res.status(httpStatus.OK).json(updatedUser);
+    if (!updatedUser) {
+      return res.status(httpStatus.BAD_REQUEST).json({
+        error: "User password Update error!!",
+      });
+    }
+
+    // Pw reset success then  send to email
+    const { email } = req.body;
+    console.log(email);
+
+    const emailInfo = {
+      from: process.env.EMAIL_FROM,
+      to: email,
+      subject: "Reset password",
+      html: `<h3>Your password has been successfully updated.</h3>
+            <p>New password: ${newPassword}</p>
+            <hr/> `,
+    };
+
+    let transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: `${process.env.EMAIL_FROM}`,
+        pass: `${process.env.EMAIL_PW}`,
+      },
+    });
+
+    const { password, ...exceptThePassword } = findUser._doc;
+
+    transporter
+      .sendMail(emailInfo)
+      .then((sent) => {
+        return res.status(httpStatus.OK).json({
+          message: `Your new password has been sent to your ${email}.`,
+          updatedUser: exceptThePassword,
+        });
+      })
+      .catch((err) => {
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+          errormsg: err,
+        });
+      });
   } catch (err) {
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json(err);
   }
