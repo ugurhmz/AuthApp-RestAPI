@@ -7,10 +7,20 @@ exports.registerController = async (req, res) => {
   console.log(req.body);
 
   try {
-    const findUser = await UserModel.findOne({ email });
+    const findUser = await UserModel.findOne({
+      $or: [
+        {
+          email: email,
+        },
+        {
+          username: username,
+        },
+      ],
+    });
+
     if (findUser) {
       return res.status(httpStatus.CONFLICT).json({
-        error: "E-mail already exist!",
+        error: "This a record already exists!, Pls change e-mail or username!",
       });
     }
 
