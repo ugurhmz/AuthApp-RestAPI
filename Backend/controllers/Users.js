@@ -223,6 +223,25 @@ exports.resetPasswordController = async (req, res) => {
 };
 
 // LOGUT
-exports.logOutController = (req, res) => {
-  console.log("middleware geçti");
+exports.logOutController = async (req, res) => {
+  console.log("middleware geçti", req.user);
+  const authHeader = req.headers.token;
+
+  if (authHeader) {
+    const splitToken = authHeader.split(" ")[1];
+    const userToken = req.user.token;
+
+    try {
+      const findUser = await UserModel.findById(req.user._id);
+      const loginToken = null;
+
+      res.status(httpStatus.OK).json({ message: "Successfully Logout" });
+    } catch (err) {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).json(err);
+    }
+  } else {
+    return res
+      .status(httpStatus.UNAUTHORIZED)
+      .json({ msg: "Authorization fail!" });
+  }
 };

@@ -18,6 +18,7 @@ const tokenVerify = async (req, res, next) => {
           .status(httpStatus.UNAUTHORIZED)
           .json({ msg: "Unauthorized access!" });
       }
+      console.log("user", user);
       req.user = user;
       next();
     } catch (error) {
