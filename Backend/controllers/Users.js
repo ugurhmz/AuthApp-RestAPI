@@ -112,7 +112,7 @@ exports.loginController = async (req, res) => {
     const findUser = await UserModel.findOne({ email: req.body.email });
 
     if (!findUser) {
-      return res.status(httpStatus.NOT_FOUND).json({
+      return res.status(httpStatus.NOT_FOUND).send({
         msg: "User not found, try again!",
       });
     }
@@ -220,4 +220,9 @@ exports.resetPasswordController = async (req, res) => {
   } catch (err) {
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json(err);
   }
+};
+
+// LOGUT
+exports.logOutController = (req, res) => {
+  console.log("middleware geçti");
 };
